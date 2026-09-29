@@ -389,6 +389,15 @@ document.addEventListener(
                         insideScreen
                             ? "visible"
                             : "hidden";
+
+                    if (button.dataset.topic === "contraponto") {
+                        console.log("Hotspot 5:", {
+                            x: screenX,
+                            y: screenY,
+                            z: projectedPoint.z,
+                            dentroDaTela: insideScreen
+                        });
+                    }
                 }
             );
         }
