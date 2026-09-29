@@ -1,17 +1,19 @@
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-        /*
-        * Todo o código da aplicação
-        * ficará dentro desta função.
-        */
-
+        /* =========================================================
+        1. REFERÊNCIAS À CENA DE RA
+        ========================================================= */
         const scene =
             document.querySelector("#ar-scene");
         const target =
             document.querySelector("#target");
         const cameraElement =
             document.querySelector("#ar-camera");
+
+        /* =========================================================
+        2. REFERÊNCIAS À INTERFACE HTML
+        ========================================================= */
         const status =
             document.querySelector("#status");
         const badge =
@@ -27,332 +29,366 @@ document.addEventListener(
         const closeButton =
             document.querySelector("#close-panel");
 
+        /*
+        * Busca os quatro BOTÕES HTML.
+        *
+        * Se este resultado estiver vazio, significa que
+        * index.html e app.js estão em versões incompatíveis.
+        */
         const hotspots =
             Array.from(
-                document.querySelectorAll(
-                    ".hotspot"
-                )
+                document.querySelectorAll(".hotspot")
             );
 
         /*
-        * false: target não está sendo rastreado.
-        * true: target está sendo rastreado.
+        * Guarda se o MindAR está rastreando o target.
         */
         let tracking =
             false;
 
+        /* =========================================================
+        3. BASE DE DADOS DIDÁTICA
+        ========================================================= */
         const information = {
+
             placa: {
                 title:
                     "Cabeçote e placa",
-
-            text:
-                "A placa fixa a peça e o cabeçote fornece o movimento de rotação necessário ao torneamento.",
-            
-            detail:
-                "A fixação correta é essencial para precisão e segurança."
+                text:
+                    "A placa fixa a peça e o cabeçote fornece o movimento de rotação necessário ao torneamento.",
+                detail:
+                    "A fixação correta é essencial para precisão e segurança."
             },
-
             torre: {
                 title:
                     "Torre de ferramentas",
-
                 text:
                     "A torre organiza as ferramentas de corte e permite selecionar a ferramenta necessária em cada etapa do programa CNC.",
-
                 detail:
                     "A indexação da torre pode integrar a sequência automática de usinagem."
-                },
-
+            },
             comando: {
-
                 title:
                     "Painel de comando CNC",
-                
                 text:
-                "O painel é a interface entre operador, programa CNC e sistema de controle da máquina.",
-            
+                    "O painel é a interface entre operador, programa CNC e sistema de controle da máquina.",
                 detail:
-                "Os dados apresentados nesta experiência são didáticos."
-                },
-            
+                    "Os dados apresentados nesta experiência são didáticos."
+            },
             seguranca: {
-
                 title:
                     "Proteção e segurança",
-            
-                    text:
-                        "Portas, proteções e intertravamentos ajudam a separar o operador da região de usinagem.",
-            
-                        detail:
-                            "A Realidade Aumentada não substitui treinamento ou documentação do fabricante."
+                text:
+                    "Portas, proteções e intertravamentos ajudam a separar o operador da região de usinagem.",
+                detail:
+                    "A Realidade Aumentada não substitui treinamento ou documentação do fabricante."
+            }
+        };
+
+        /* =========================================================
+        4. FUNÇÃO QUE ABRE O PAINEL
+        ========================================================= */
+        function showInformation(topicName) {
+            const selected =
+                information[topicName];
+
+            /*
+            * Proteção contra data-topic inexistente.
+            */
+            if (!selected) {
+                return;
             }
 
-        };
-    }
-);
+            panelTitle.textContent =
+                selected.title;
+            panelText.textContent =
 
-function showInformation(
-    topicName
-) {
+                selected.text;
+            panelDetail.textContent =
+                selected.detail;
 
-    const selected =
-        information[topicName];
+            /*
+            * Remove hidden e mostra o painel.
+            */
+            panel.classList.remove(
+                "hidden"
+            );
+        }
 
-    /*
-    * Se não existir informação
-    * para o tópico, encerra.
-    */
-    if (!selected) {
-        return;
-    }
+        /* =========================================================
+        5. FUNÇÃO QUE FECHA O PAINEL
+        ========================================================= */
+        function hideInformation() {
+            panel.classList.add(
+                "hidden"
+            );
+        }
 
-    panelTitle.textContent =
-        selected.title;
-    panelText.textContent =
-        selected.text;
-    panelDetail.textContent =
-        selected.detail;
+        /* =========================================================
+        6. EVENTOS DOS HOTSPOTS
+        pointerup funciona com:
+        - mouse;
+        - toque;
+        - caneta.
+        Não dependemos mais do raycaster para o clique.
+        ========================================================= */
+        hotspots.forEach(
+            (button) => {
+                button.addEventListener(
+                    "pointerup",
+                    (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-    /*
-    * Exibe o painel.
-    */
-    panel.classList.remove(
-        "hidden"
-    );
+                        const topicName =
+                            button.dataset.topic;
 
-}
+                        showInformation(
+                            topicName
+                        );
+                    }
+                );
+            }
+        );
 
-function hideInformation() {
-
-    panel.classList.add(
-        "hidden"
-    );
-
-}
-
-hotspots.forEach(
-    (button) => {
-
-        button.addEventListener(
+        /* =========================================================
+        
+        Realidade Aumentada — Manual Interativo do Torno CNC | Roteiro do Aluno
+        
+        7. BOTÃO DE FECHAR
+        ========================================================= */
+        closeButton.addEventListener(
             "pointerup",
             (event) => {
-
                 event.preventDefault();
-
-                event.stopPropagation();
-
-                const topicName =
-                    button.dataset.topic;
-
-                showInformation(
-                    topicName
-                );
+                hideInformation();
             }
         );
-    }
-);
 
-closeButton.addEventListener(
-    "pointerup",
-    (event) => {
-
-        event.preventDefault();
-
-        hideInformation();
-
-    }
-
-);
-
-scene.addEventListener(
-    "arReady",
-    () => {
-
-        status.textContent =
-            "Câmera pronta. Aponte para a imagem do torno.";
-
-        badge.textContent =
-            "PROCURANDO ALVO";
-    }
-
-);
-
-scene.addEventListener(
-    "arError",
-    () => {
-
-        status.textContent =
-            "Não foi possível iniciar a câmera.";
-        badge.textContent =
-            "ERRO";
-
-    }
-    
-);
-
-target.addEventListener(
-    "targetFound",
-    () => {
-        tracking =
-            true;
-
-        status.textContent =
-            "Torno reconhecido. Toque em um ponto numerado.";
-
-        badge.textContent =
-            "● RA ATIVA";
-
-        hotspots.forEach(
-            (button) => {
-
-                button.classList.add(
-                    "visible"
-                );
-
+        /* =========================================================
+        8. MINDAR PRONTO
+        ========================================================= */
+        scene.addEventListener(
+            "arReady",
+            () => {
+                status.textContent =
+                    "Câmera pronta. Aponte para a imagem do torno.";
+                badge.textContent =
+                    "PROCURANDO ALVO";
             }
-
         );
 
-    }
+        /* =========================================================
+        9. ERRO AO INICIAR RA
+        ========================================================= */
+        scene.addEventListener(
+            "arError",
+            () => {
+                status.textContent =
+                    "Não foi possível iniciar a câmera.";
+                badge.textContent =
+                    "ERRO";
+            }
+        );
 
-);
+        /* =========================================================
+        10. TARGET ENCONTRADO
+        ========================================================= */
+        target.addEventListener(
+            "targetFound",
+            () => {
+                tracking =
+                    true;
 
-target.addEventListener(
-    "targetLost",
-    () => {
+                status.textContent =
+                    "Torno reconhecido. Toque em um ponto numerado.";
+                badge.textContent =
+                    "● RA ATIVA";
 
-        tracking =
-            false;
-
-        status.textContent =
-            "Alvo perdido. Aponte novamente para a imagem.";
-            
-        badge.textContent =
-            "PROCURANDO ALVO";
-
-        hotspots.forEach(
-            (button) => {
-
-                button.classList.remove(
-                    "visible"
+                /*
+                * Agora os botões podem aparecer.
+                */
+                hotspots.forEach(
+                    (button) => {
+                        button.classList.add(
+                            "visible"
+                        );
+                    }
                 );
             }
         );
 
-    hideInformation();
+        /* =========================================================
+        11. TARGET PERDIDO
+        ========================================================= */
+        target.addEventListener(
+            "targetLost",
+            () => {
+                tracking =
+                    false;
 
-    }
+                status.textContent =
+                    "Alvo perdido. Aponte novamente para a imagem.";
+                badge.textContent =
+                    "PROCURANDO ALVO";
 
-);
+                hotspots.forEach(
+                    (button) => {
+                        button.classList.remove(
+                            "visible"
+                        );
+                    }
+                );
 
-function updateHotspotPositions() {
-    /*
-    * Agenda a próxima atualização.
-    */
-
-    requestAnimationFrame(
-        updateHotspotPositions
-    );
-
-    /*
-    * Sem tracking, interrompe
-    * os cálculos deste quadro.
-    */
-
-    if (!tracking) {
-        return;
-    }
-
-    const camera =
-        cameraElement.getObject3D(
-            "camera"
+                hideInformation();
+            }
         );
 
-    if (
-        !camera ||
-        !target.object3D
-    ) {
-        return;
-    }
-
-    target.object3D.updateMatrixWorld(
-        true
-    );
-
-    camera.updateMatrixWorld(
-        true
-    );
-
-    hotspots.forEach(
-        (button) => {
-
-        const localPoint =
-            new THREE.Vector3(
-
-                Number(button.dataset.x),
-
-                Number(button.dataset.y),
-
-                Number(button.dataset.z)
-
+        /* =========================================================
+        12. CONVERTER POSIÇÃO 3D EM POSIÇÃO 2D
+        Cada botão possui:
+        data-x
+        data-y
+        data-z
+        Essas coordenadas representam um ponto local no target.
+        O processo é:
+        posição local
+        ↓
+        posição no mundo 3D
+        
+        Realidade Aumentada — Manual Interativo do Torno CNC | Roteiro do Aluno
+        
+        ↓
+        projeção pela câmera
+        ↓
+        pixels da tela
+        ========================================================= */
+        function updateHotspotPositions() {
+            /*
+            * Agenda a próxima atualização.
+            */
+            requestAnimationFrame(
+                updateHotspotPositions
             );
 
-        const projectedPoint =
-            worldPoint
+            /*
+            * Não precisamos calcular nada
+            * enquanto o target não estiver ativo.
+            */
+            if (!tracking) {
+                return;
+            }
 
-                .clone()
-                .project(
-
-                    camera
+            /*
+            * Obtém a câmera Three.js interna do A-Frame.
+            */
+            const camera =
+                cameraElement.getObject3D(
+                    "camera"
                 );
 
-        const screenX =
-            (
-                projectedPoint.x * 0.5 +
-                0.5
-            ) *
+            /*
+            * Aguarda a inicialização completa.
+            */
+            if (
+                !camera ||
+                !target.object3D
+            ) {
+                return;
+            }
 
-            window.innerWidth;
+            /*
+            * Atualiza as matrizes antes do cálculo.
+            */
+            target.object3D.updateMatrixWorld(
+                true
+            );
+            camera.updateMatrixWorld(
+                true
+            );
 
-            const screenY =
-            (
-                -projectedPoint.y * 0.5 +
-                0.5
-            ) *
+            /*
+            * Recalcula a posição de cada botão.
+            */
+            hotspots.forEach(
+                (button) => {
+                    /*
+                    * Cria o ponto local relativo ao target.
+                    */
+                    const localPoint =
+                        new THREE.Vector3(
+                            Number(button.dataset.x),
+                            Number(button.dataset.y),
+                            Number(button.dataset.z)
+                        );
 
-            window.innerHeight;
 
-        button.style.left =
-            `${screenX}px`;
+                    /*
+                    * Converte de coordenadas locais
+                    * para coordenadas do mundo 3D.
+                    */
+                    const worldPoint =
+                        target.object3D.localToWorld(
+                            localPoint
+                        );
 
-        button.style.top =
-            `${screenY}px`;
+                    /*
+                    * Projeta o ponto usando a câmera.
+                    */
+                    const projectedPoint =
+                        worldPoint
+                            .clone()
+                            .project(camera);
 
-        const insideScreen =
-            projectedPoint.z > -1 &&
-            projectedPoint.z < 1 &&
+                    /*
+                    * Converte -1..+1 para pixels.
+                    */
+                    const screenX =
+                        (
+                            projectedPoint.x * 0.5 +
+                            0.5
+                        ) *
+                        window.innerWidth;
 
-            screenX > -80 &&
-            screenX < window.innerWidth + 80 &&
+                    const screenY =
+                        (
+                            -projectedPoint.y * 0.5 +
+                            0.5
+                        ) *
+                        window.innerHeight;
 
-            screenY > -80 &&
-            screenY < window.innerHeight + 80;
+                    /*
+                    * Posiciona o botão HTML.
+                    */
+                    button.style.left =
+                        `${screenX}px`;
+                    button.style.top =
+                        `${screenY}px`;
 
-            button.style.visibility =
-                insideScreen
-                    ? "visible"
-                    : "hidden";
+                    /*
+                    * Evita exibir botões fora da área útil.
+                    */
+                    const insideScreen =
+                        projectedPoint.z > -1 &&
+                        projectedPoint.z < 1 &&
+                        screenX > -80 &&
+                        screenX < window.innerWidth + 80 &&
+                        screenY > -80 &&
+                        screenY < window.innerHeight + 80;
 
+                    button.style.visibility =
+                        insideScreen
+                            ? "visible"
+                            : "hidden";
+                }
+            );
         }
-        
-    );
 
-    updateHotspotPositions();
+        /* =========================================================
+        13. INICIA A ATUALIZAÇÃO DOS HOTSPOTS
+        ========================================================= */
 
-}        
-/*
-* Primeira chamada.
-* As próximas serão agendadas
-* por requestAnimationFrame().
-*/
+
+        updateHotspotPositions();
+    }
+);
