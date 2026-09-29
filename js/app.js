@@ -82,7 +82,16 @@ document.addEventListener(
                     "Portas, proteções e intertravamentos ajudam a separar o operador da região de usinagem.",
                 detail:
                     "A Realidade Aumentada não substitui treinamento ou documentação do fabricante."
+            },
+            
+            contraponto: {
+                title: "Contraponto do torno CNC",
+
+                text: "O contraponto é utilizado para apoiar a extremidade de peças longas, contribuindo para a estabilidade durante determinadas operações de torneamento.",
+
+                detail: "Seu posicionamento e sua utilização devem seguir as especificações do fabricante e os procedimentos de segurança."
             }
+
         };
 
         /* =========================================================
